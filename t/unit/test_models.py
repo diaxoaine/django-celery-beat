@@ -147,6 +147,7 @@ class IntervalScheduleTestCase(TestCase, TestDuplicatesMixin):
     def test_from_schedule_default_period_seconds(self):
         schedule = schedules.schedule(run_every=datetime.timedelta(minutes=3))
         result = IntervalSchedule.from_schedule(schedule)
+        self.assertIsInstance(result.every, int)
         self.assertEqual(result.every, 180)
         self.assertEqual(result.period, IntervalSchedule.SECONDS)
 
@@ -156,18 +157,21 @@ class IntervalScheduleTestCase(TestCase, TestDuplicatesMixin):
             schedule,
             period=IntervalSchedule.MINUTES
         )
+        self.assertIsInstance(result.every, int)
         self.assertEqual(result.every, 3)
         self.assertEqual(result.period, IntervalSchedule.MINUTES)
 
     def test_from_schedule_period_hours(self):
         schedule = schedules.schedule(run_every=datetime.timedelta(hours=2))
         result = IntervalSchedule.from_schedule(schedule, period=IntervalSchedule.HOURS)
+        self.assertIsInstance(result.every, int)
         self.assertEqual(result.every, 2)
         self.assertEqual(result.period, IntervalSchedule.HOURS)
 
     def test_from_schedule_period_days(self):
         schedule = schedules.schedule(run_every=datetime.timedelta(days=5))
         result = IntervalSchedule.from_schedule(schedule, period=IntervalSchedule.DAYS)
+        self.assertIsInstance(result.every, int)
         self.assertEqual(result.every, 5)
         self.assertEqual(result.period, IntervalSchedule.DAYS)
 
@@ -177,8 +181,19 @@ class IntervalScheduleTestCase(TestCase, TestDuplicatesMixin):
             schedule,
             period=IntervalSchedule.MICROSECONDS
         )
+        self.assertIsInstance(result.every, int)
         self.assertEqual(result.every, 50_000)
         self.assertEqual(result.period, IntervalSchedule.MICROSECONDS)
+
+    def test_from_schedule_period_rounds_down(self):
+        schedule = schedules.schedule(run_every=datetime.timedelta(seconds=100))
+        result = IntervalSchedule.from_schedule(
+            schedule,
+            period=IntervalSchedule.MINUTES
+        )
+        self.assertIsInstance(result.every, int)
+        self.assertEqual(result.every, 1)
+        self.assertEqual(result.period, IntervalSchedule.MINUTES)
 
 
 class ClockedScheduleTestCase(TestCase, TestDuplicatesMixin):
