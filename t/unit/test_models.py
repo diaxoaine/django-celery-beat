@@ -11,6 +11,7 @@ import pytest
 from celery import schedules
 from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db.migrations.autodetector import MigrationAutodetector
 from django.db.migrations.loader import MigrationLoader
 from django.db.migrations.questioner import NonInteractiveMigrationQuestioner
@@ -194,6 +195,11 @@ class IntervalScheduleTestCase(TestCase, TestDuplicatesMixin):
         self.assertIsInstance(result.every, int)
         self.assertEqual(result.every, 1)
         self.assertEqual(result.period, IntervalSchedule.MINUTES)
+
+    def test_from_schedule_period_raises_when_run_every_below_period(self):
+        schedule = schedules.schedule(run_every=datetime.timedelta(seconds=30))
+        with self.assertRaises(ValidationError):
+            IntervalSchedule.from_schedule(schedule, period=IntervalSchedule.MINUTES)
 
 
 class ClockedScheduleTestCase(TestCase, TestDuplicatesMixin):

@@ -201,7 +201,9 @@ class IntervalSchedule(models.Model):
         try:
             return cls.objects.get(every=every, period=period)
         except cls.DoesNotExist:
-            return cls(every=every, period=period)
+            instance = cls(every=every, period=period)
+            instance.full_clean()
+            return instance
         except MultipleObjectsReturned:
             return cls.objects.filter(every=every, period=period).first()
 
